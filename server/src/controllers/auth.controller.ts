@@ -1,14 +1,23 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client/edge';
+import { NextFunction, Request, Response } from 'express';
+import prisma from '../prisma';
+import catchAsync from '../utils/catchAsync';
+import AppError from '../utils/appError';
 
-export async function signup(req: Request, res: Response) {
-	res.send('Hello');
-}
+const signup = catchAsync(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { name, email, password, passwordConfirm } = req.body;
 
-export const login = async (req: Request, res: Response) => {
-	res.send('Hello');
-};
+		const user = await prisma.user.create({
+			data: {
+				name,
+				email,
+				password,
+				passwordConfirm,
+			},
+		});
 
-export const logout = async (req: Request, res: Response) => {
-	res.send('Hello');
-};
+		res.status(200).json(user);
+	}
+);
+
+export default signup;

@@ -14,18 +14,25 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  email    String  @unique
-  name     String?
-  password String
-  posts    Post[]
+  id              String @id @default(cuid())
+  email           String @unique
+  name            String
+  password        String
+  passwordConfirm String
+  Blog            Blog[]
+
+  @@index([email])
 }
 
-model Post {
-  id        String  @id @default(cuid())
-  title     String
+model Blog {
+  id        String   @id @default(cuid())
+  title     String   @unique
+  slug      String   @unique
   content   String
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  String?
+
+  @@index([authorId])
 }
