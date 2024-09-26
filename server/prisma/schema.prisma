@@ -14,18 +14,77 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  email    String  @unique
-  name     String?
-  password String
-  posts    Post[]
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String
+  password     String
+  Blog         Blog[]
+  like         Like[]
+  Subscription Subscription[]
+  Comment      Comment[]
+
+  @@index([email])
 }
 
-model Post {
-  id        String  @id @default(cuid())
-  title     String
-  content   String
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
+model Blog {
+  id         String    @id @default(cuid())
+  title      String    @unique
+  slug       String    @unique
+  content    String
+  image      String?
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String
+  Category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId String?
+  Comment    Comment[]
+  like       Like[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([authorId])
+  @@index([categoryId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blogId    String
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String?
+
+  @@index([authorId])
+  @@index([blogId])
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([authorId, categoryId])
+}
+
+model Comment {
+  id       String @id @default(cuid())
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  blog     Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blogId   String
+  like     Like[]
+
+  @@index([authorId])
+  @@index([blogId])
+}
+
+model Category {
+  id           String         @id @default(cuid())
+  name         String
+  Blog         Blog[]
+  Subscription Subscription[]
 }
